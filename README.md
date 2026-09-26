@@ -6,7 +6,12 @@ Deploy Glyphyard to a domain like `fonts.example.com`, browse the full Google
 Fonts library, click the styles you want and copy the embed code. It works like
 Google Fonts, but your visitors only ever talk to your domain.
 
-![Glyphyard showing serif fonts previewed with custom text](docs/screenshot.png)
+**[Live demo →](https://glyphyard.patrickob.tech)**
+
+[![Glyphyard showing serif fonts previewed with custom text](docs/screenshot.png)](https://glyphyard.patrickob.tech)
+
+> The demo is open so you can try it. For your own sites, deploy your own
+> instance. That's the whole point.
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fobrienafc%2Fglyphyard&project-name=glyphyard&env=GLYPHYARD_NAME&envDescription=Name%20shown%20in%20the%20header%20(optional))
 
