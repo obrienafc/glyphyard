@@ -362,16 +362,18 @@ button {
   max-width: 880px;
 }
 
-.controls-row .preview-input {
+.controls-row .preview-input,
+.controls-row .pair-open {
   grid-column: 1 / -1;
 }
 
 @media (min-width: 734px) {
   .controls-row {
-    grid-template-columns: 1fr 180px auto auto;
+    grid-template-columns: 1fr 180px auto auto auto;
     gap: 12px;
   }
-  .controls-row .preview-input {
+  .controls-row .preview-input,
+  .controls-row .pair-open {
     grid-column: auto;
   }
 }
@@ -605,6 +607,20 @@ select.field {
   margin: 0;
 }
 
+.footer p + p {
+  margin-top: var(--space-sm);
+}
+
+.footer-badge {
+  display: inline-block;
+  margin-top: var(--space-md);
+}
+
+.footer-badge img {
+  display: block;
+  height: 20px;
+}
+
 /* Buttons ------------------------------------------------------------------ */
 
 .button {
@@ -696,7 +712,7 @@ select.field {
 
 @media (max-width: 520px) {
   .tray-styles,
-  .tray .button.plain {
+  .tray .button.plain:not(.tray-pair) {
     display: none;
   }
 }
@@ -990,4 +1006,139 @@ select.field {
     animation: none !important;
     transition: none !important;
   }
+}
+
+/* Pairing ------------------------------------------------------------------- */
+
+.pair-open {
+  width: auto;
+  padding: 0 18px;
+  border: 0;
+  color: var(--accent);
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.pair-open:hover {
+  background: var(--fill);
+}
+
+.sheet.wide {
+  width: min(880px, calc(100vw - 32px));
+}
+
+@media (max-width: 733px) {
+  .sheet.wide {
+    width: 100vw;
+  }
+}
+
+.pair-controls {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: end;
+  gap: 12px;
+  margin-bottom: var(--space-md);
+}
+
+.pair-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.pair-field-label {
+  color: var(--text-3);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.pair-field input {
+  width: 100%;
+  height: 44px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--fill);
+  font-size: 15px;
+  outline: none;
+}
+
+.pair-field input:focus {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 45%, transparent);
+}
+
+.icon-button.swap {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--accent);
+  cursor: pointer;
+}
+
+.icon-button.swap:hover {
+  background: var(--fill);
+}
+
+.pair-preview {
+  margin-top: var(--space-md);
+  padding: clamp(24px, 5vw, 48px);
+  border-radius: 18px;
+  background: var(--bg);
+}
+
+.pair-preview h3 {
+  margin: 0;
+  /* Undo the small uppercase label style sheets use for h3. */
+  color: var(--text);
+  text-transform: none;
+  font-size: clamp(34px, 6vw, 56px);
+  line-height: 1.05;
+  letter-spacing: normal;
+  overflow-wrap: anywhere;
+}
+
+.pair-byline {
+  margin: 12px 0 0;
+  color: var(--text-2);
+  font-size: 15px;
+  letter-spacing: normal;
+}
+
+.pair-text {
+  max-width: 62ch;
+  margin: 20px 0 0;
+  font-size: 18px;
+  line-height: 1.65;
+  letter-spacing: normal;
+}
+
+.pair-meta {
+  margin: 12px 0 0;
+  font-size: 13px;
+}
+
+.pair-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  margin-top: var(--space-lg);
+}
+
+.pair-actions .button {
+  gap: 6px;
+}
+
+.share-button {
+  margin: 0 0 var(--space-md) -14px;
+}
+
+.demo-note {
+  margin: 0 0 var(--space-md);
 }

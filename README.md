@@ -27,7 +27,12 @@ Google Fonts, but your visitors only ever talk to your domain.
   so they never change). CSS is cached for a day.
 - **Every family, every style.** All ~1,900 families, variable weight ranges,
   italics, and a language filter.
-- **Shareable views.** `?category=serif&text=Hello&sort=newest&size=48&q=mono`.
+- **Pairing view.** Set a heading and body font together over a public-domain
+  passage (Joyce, Austen or Melville), swap them, and add both in one click.
+- **Shareable links.** Selections (`?f=Inter:400,700&f=Lora:400:v`), pairings
+  (`?pair=Playfair Display|Inter`) and views
+  (`?category=serif&text=Hello&sort=newest&size=48`).
+- **Light, dark or system appearance**, remembered per browser.
 
 ## Deploy
 
@@ -52,10 +57,15 @@ Set these as environment variables and redeploy. See `.env.example`.
 | Variable             | Default     | Description |
 | -------------------- | ----------- | ----------- |
 | `GLYPHYARD_NAME`     | `Glyphyard` | Name shown in the header and page title. |
-| `GLYPHYARD_FAMILIES` | *(all)*     | Comma-separated allowlist, e.g. `Inter,Playfair Display`. When set, only these families are listed and served, so nobody else can use your domain as a free font CDN. |
+| `GLYPHYARD_FAMILIES` | *(all)*     | Comma-separated allowlist, e.g. `Inter,Playfair Display`. When set, only these families are listed and served. |
+| `GLYPHYARD_ALLOWED_ORIGINS` | *(any site)* | Comma-separated sites allowed to embed your fonts, e.g. `example.com` (subdomains included). Other sites get a 403 with a note to deploy their own. Requests without an `Origin`/`Referer` (privacy tools) are still served. |
+| `GLYPHYARD_SPILLCHECK_BADGE` | off | `1` shows a [Spillcheck](https://spillcheck.patrickob.tech) privacy badge in the footer. Off by default because it loads an image from Spillcheck. |
 
-If your instance is public, setting `GLYPHYARD_FAMILIES` is recommended: bandwidth
-is billed to you.
+If your instance is public, set `GLYPHYARD_ALLOWED_ORIGINS` (or
+`GLYPHYARD_FAMILIES`): bandwidth is billed to you. The public demo allows only
+`patrickob.tech` sites to embed its fonts, but you can browse and pair freely.
+Responses vary on `Origin` and `Referer`, so the CDN never hands one site's
+cached fonts to another.
 
 ## How it works
 

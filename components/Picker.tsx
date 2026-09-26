@@ -2,6 +2,8 @@
 
 import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 import type { Font } from '@/lib/catalog';
+import { PairSheet, bodyStyle, headingStyle } from './PairSheet';
+import { Sheet } from './Sheet';
 import { ThemeToggle } from './ThemeToggle';
 import {
   type Selection,
@@ -14,6 +16,8 @@ import {
   styleLabel,
   weightOf,
 } from '@/lib/fonts';
+import { decodeSelection, shareUrl } from '@/lib/share';
+import { SpillcheckBadge } from './SpillcheckBadge';
 
 const CATEGORIES = ['All', 'Sans Serif', 'Serif', 'Display', 'Handwriting', 'Monospace'];
 const SORTS = { popular: 'Popular', name: 'Name', newest: 'Newest' } as const;
@@ -23,9 +27,17 @@ const DEFAULT_PREVIEW = 'Sphinx of black quartz, judge my vow';
 const DEFAULT_STYLE_PREVIEW = 'Sphinx of black quartz, judge my vow. 0123456789';
 const SELECTION_KEY = 'glyphyard:selection';
 
-type Props = { fonts: Font[]; name: string; restricted: boolean; updated: string };
+type Props = {
+  fonts: Font[];
+  name: string;
+  restricted: boolean;
+  updated: string;
+  /** Sites allowed to embed this instance's fonts, or null for any site. */
+  embedOrigins: string[] | null;
+  showBadge: boolean;
+};
 
-export function Picker({ fonts, name, restricted, updated }: Props) {
+export function Picker({ fonts, name, restricted, updated, embedOrigins, showBadge }: Props) {
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('All');
   const [subset, setSubset] = useState('');
@@ -37,6 +49,9 @@ export function Picker({ fonts, name, restricted, updated }: Props) {
   const [open, setOpen] = useState<Font | null>(null);
   const [embedOpen, setEmbedOpen] = useState(false);
   const [origin, setOrigin] = useState('');
+  const [pair, setPair] = useState<[Font, Font] | null>(null);
+
+  const byFamily = useMemo(() => new Map(fonts.map((f) => [f.family, f])), [fonts]);
 
   useEffect(() => {
     setOrigin(window.location.origin);
@@ -50,11 +65,23 @@ export function Picker({ fonts, name, restricted, updated }: Props) {
     if (params.get('text')) setPreviewText(params.get('text')!);
     const sz = Number(params.get('size'));
     if (sz >= 16 && sz <= 96) setSize(sz);
-    try {
-      const saved = JSON.parse(localStorage.getItem(SELECTION_KEY) ?? '{}');
-      if (saved && typeof saved === 'object') setSelection(saved);
-    } catch {}
-  }, []);
+    // A shared link (?f=Inter:400,700) replaces the saved selection.
+    const shared = decodeSelection(params.getAll('f'), byFamily);
+    if (Object.keys(shared).length) {
+      setSelection(shared);
+      try {
+        localStorage.setItem(SELECTION_KEY, JSON.stringify(shared));
+      } catch {}
+    } else {
+      try {
+        const saved = JSON.parse(localStorage.getItem(SELECTION_KEY) ?? '{}');
+        if (saved && typeof saved === 'object') setSelection(saved);
+      } catch {}
+    }
+    // ?pair=Heading|Body opens the pairing view.
+    const [h, b] = (params.get('pair') ?? '').split('|').map((f) => byFamily.get(f));
+    if (h && b) setPair([h, b]);
+  }, [byFamily]);
 
   const updateSelection = useCallback((next: Selection) => {
     setSelection(next);
@@ -63,7 +90,6 @@ export function Picker({ fonts, name, restricted, updated }: Props) {
     } catch {}
   }, []);
 
-  const byFamily = useMemo(() => new Map(fonts.map((f) => [f.family, f])), [fonts]);
 
   const subsets = useMemo(() => {
     const counts = new Map<string, number>();
@@ -100,6 +126,28 @@ export function Picker({ fonts, name, restricted, updated }: Props) {
   }, []);
 
   const selectedFamilies = Object.keys(selection).filter((f) => byFamily.has(f));
+
+  const openPair = () => {
+    const picked = selectedFamilies.map((f) => byFamily.get(f)!);
+    const fallback = ['Playfair Display', 'Inter', 'Lora', 'Roboto']
+      .map((f) => byFamily.get(f))
+      .filter((f): f is Font => !!f);
+    const pool = [...picked, ...fallback, ...fonts].filter((f, i, all) => all.indexOf(f) === i);
+    if (pool.length >= 2) setPair([pool[0], pool[1]]);
+  };
+
+  const addPair = (heading: Font, body: Font) => {
+    const next = { ...selection };
+    const add = (font: Font, style: string) => {
+      const current = next[font.family];
+      next[font.family] = current
+        ? { ...current, styles: current.styles.includes(style) ? current.styles : [...current.styles, style] }
+        : { styles: [style], variable: false };
+    };
+    add(heading, headingStyle(heading));
+    add(body, bodyStyle(body));
+    updateSelection(next);
+  };
   const styleCount = selectedFamilies.reduce((n, f) => n + selection[f].styles.length, 0);
   const host = origin.replace(/^https?:\/\//, '');
 
@@ -196,6 +244,9 @@ export function Picker({ fonts, name, restricted, updated }: Props) {
               </option>
             ))}
           </select>
+          <button type="button" className="field pair-open" onClick={openPair}>
+            Pair fonts
+          </button>
         </div>
       </div>
 
@@ -229,6 +280,16 @@ export function Picker({ fonts, name, restricted, updated }: Props) {
               GitHub
             </a>
           </p>
+          {embedOrigins && (
+            <p>
+              This is a public demo: its fonts only load on {embedOrigins.join(', ')}.{' '}
+              <a href="https://github.com/obrienafc/glyphyard#deploy" target="_blank" rel="noreferrer">
+                Deploy your own
+              </a>{' '}
+              to use it on any site.
+            </p>
+          )}
+          {showBadge && <SpillcheckBadge />}
         </footer>
       </main>
 
@@ -244,6 +305,9 @@ export function Picker({ fonts, name, restricted, updated }: Props) {
           </span>
           <button className="button plain" onClick={() => updateSelection({})}>
             Clear
+          </button>
+          <button className="button plain tray-pair" onClick={openPair}>
+            Pair
           </button>
           <button className="button primary" onClick={() => setEmbedOpen(true)}>
             Get embed code
@@ -266,9 +330,21 @@ export function Picker({ fonts, name, restricted, updated }: Props) {
         />
       )}
 
+      {pair && (
+        <PairSheet
+          fonts={fonts}
+          byFamily={byFamily}
+          initial={pair}
+          origin={origin}
+          onAdd={addPair}
+          onClose={() => setPair(null)}
+        />
+      )}
+
       {embedOpen && (
         <EmbedSheet
           origin={origin}
+          embedOrigins={embedOrigins}
           fonts={selectedFamilies.map((f) => byFamily.get(f)!)}
           selection={selection}
           onEdit={(font) => {
@@ -374,34 +450,6 @@ function FontCard({
   );
 }
 
-function Sheet({
-  label,
-  onClose,
-  children,
-}: {
-  label: string;
-  onClose: () => void;
-  children: React.ReactNode;
-}) {
-  const ref = useRef<HTMLDialogElement>(null);
-  useEffect(() => {
-    const dialog = ref.current;
-    dialog?.showModal();
-    return () => dialog?.close();
-  }, []);
-  return (
-    <dialog
-      ref={ref}
-      className="sheet"
-      aria-label={label}
-      onClose={onClose}
-      onClick={(e) => e.target === ref.current && onClose()}
-    >
-      <div className="sheet-body">{children}</div>
-    </dialog>
-  );
-}
-
 function StylesSheet({
   font,
   text,
@@ -495,6 +543,7 @@ function StylesSheet({
 
 function EmbedSheet({
   origin,
+  embedOrigins,
   fonts,
   selection,
   onEdit,
@@ -502,6 +551,7 @@ function EmbedSheet({
   onClose,
 }: {
   origin: string;
+  embedOrigins: string[] | null;
   fonts: Font[];
   selection: Selection;
   onEdit: (font: Font) => void;
@@ -526,6 +576,18 @@ function EmbedSheet({
           Done
         </button>
       </div>
+
+      <ShareButton url={shareUrl(origin, { selection })} />
+
+      {embedOrigins && (
+        <p className="muted small-print demo-note">
+          This demo only serves fonts to {embedOrigins.join(', ')}. For other sites,{' '}
+          <a href="https://github.com/obrienafc/glyphyard#deploy" target="_blank" rel="noreferrer">
+            deploy your own Glyphyard
+          </a>
+          .
+        </p>
+      )}
 
       <div className="segmented small" role="tablist">
         <button role="tab" aria-selected={mode === 'link'} onClick={() => setMode('link')}>
@@ -572,6 +634,23 @@ function EmbedSheet({
         <code>{origin.replace(/^https?:\/\//, '')}</code> in your existing embed code.
       </p>
     </Sheet>
+  );
+}
+
+function ShareButton({ url }: { url: string }) {
+  const [copied, setCopied] = useState(false);
+  return (
+    <button
+      className="button plain share-button"
+      onClick={() =>
+        navigator.clipboard.writeText(url).then(() => {
+          setCopied(true);
+          setTimeout(() => setCopied(false), 1500);
+        })
+      }
+    >
+      {copied ? 'Link copied' : 'Copy link to this selection'}
+    </button>
   );
 }
 

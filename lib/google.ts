@@ -1,4 +1,4 @@
-import { allowedFamilies, isFamilyAllowed, slug } from './config';
+import { allowedFamilies, embedOrigins, isEmbedAllowed, isFamilyAllowed, slug } from './config';
 
 const CSS_ORIGIN = 'https://fonts.googleapis.com';
 const FILE_ORIGIN = 'https://fonts.gstatic.com';
@@ -12,6 +12,13 @@ const USER_AGENT =
 
 const CORS = { 'Access-Control-Allow-Origin': '*' };
 
+// With an embed allowlist, the CDN must cache per requesting site, not share
+// one response between an allowed site and a disallowed one.
+const VARY: Record<string, string> = embedOrigins ? { Vary: 'Origin, Referer' } : {};
+
+const DEMO_MESSAGE =
+  'this instance only serves fonts to its own sites. Deploy your own Glyphyard for free: https://github.com/obrienafc/glyphyard';
+
 /** Family names requested by a css or css2 query string. */
 function requestedFamilies(api: 'css' | 'css2', params: URLSearchParams) {
   const values = params.getAll('family');
@@ -22,7 +29,7 @@ function requestedFamilies(api: 'css' | 'css2', params: URLSearchParams) {
 function cssError(status: number, message: string) {
   return new Response(`/* Glyphyard: ${message} */\n`, {
     status,
-    headers: { 'Content-Type': 'text/css; charset=utf-8', ...CORS },
+    headers: { 'Content-Type': 'text/css; charset=utf-8', ...CORS, ...VARY },
   });
 }
 
@@ -34,6 +41,7 @@ export async function proxyCss(api: 'css' | 'css2', request: Request) {
   const params = new URL(request.url).searchParams;
   const families = requestedFamilies(api, params);
 
+  if (!isEmbedAllowed(request)) return cssError(403, DEMO_MESSAGE);
   if (families.length === 0) return cssError(400, 'missing family parameter');
 
   const blocked = families.filter((f) => !isFamilyAllowed(f));
@@ -67,6 +75,7 @@ export async function proxyCss(api: 'css' | 'css2', request: Request) {
       'Content-Type': 'text/css; charset=utf-8',
       'Cache-Control': 'public, max-age=86400, s-maxage=86400, stale-while-revalidate=604800',
       ...CORS,
+      ...VARY,
     },
   });
 }
@@ -74,6 +83,9 @@ export async function proxyCss(api: 'css' | 'css2', request: Request) {
 /** Proxies a font file from fonts.gstatic.com. Paths there are versioned, so they never change. */
 export async function proxyFile(request: Request) {
   const url = new URL(request.url);
+  if (!isEmbedAllowed(request)) {
+    return new Response('Forbidden: ' + DEMO_MESSAGE, { status: 403, headers: { ...CORS, ...VARY } });
+  }
 
   if (allowedFamilies) {
     // Paths look like /s/<family-slug>/v20/<hash>.woff2
@@ -97,6 +109,7 @@ export async function proxyFile(request: Request) {
       'Content-Type': upstream.headers.get('Content-Type') ?? 'font/woff2',
       'Cache-Control': 'public, max-age=31536000, immutable',
       ...CORS,
+      ...VARY,
     },
   });
 }
