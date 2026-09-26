@@ -266,6 +266,24 @@ button {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
 }
 
+.github-link {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  color: var(--text-2);
+  transition:
+    background 0.15s var(--ease),
+    color 0.15s var(--ease);
+}
+
+.github-link:hover {
+  background: var(--fill);
+  color: var(--text);
+}
+
 /* Narrow screens: the logo alone identifies the app, leaving room for search. */
 @media (max-width: 560px) {
   .brand-name {
@@ -446,6 +464,53 @@ select.field {
 }
 
 /* Grid --------------------------------------------------------------------- */
+
+.count-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-sm) var(--space-md);
+  margin: var(--space-xl) 0 var(--space-md);
+}
+
+.count-row .count {
+  margin: 0;
+}
+
+.quote-credit {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin: 0;
+  color: var(--text-3);
+  font-size: 13px;
+  font-style: italic;
+  letter-spacing: -0.01em;
+}
+
+.shuffle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 32px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 980px;
+  background: transparent;
+  color: var(--accent);
+  font-size: 13px;
+  font-style: normal;
+  cursor: pointer;
+}
+
+.shuffle:hover {
+  background: var(--fill);
+}
+
+.credit {
+  color: var(--text-2);
+}
 
 .count {
   margin: var(--space-xl) 0 var(--space-md);

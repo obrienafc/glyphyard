@@ -16,15 +16,14 @@ import {
   styleLabel,
   weightOf,
 } from '@/lib/fonts';
+import { QUOTES, type Quote, randomQuote } from '@/lib/quotes';
 import { decodeSelection, shareUrl } from '@/lib/share';
+import { Shuffle } from 'lucide-react';
 import { SpillcheckBadge } from './SpillcheckBadge';
 
 const CATEGORIES = ['All', 'Sans Serif', 'Serif', 'Display', 'Handwriting', 'Monospace'];
 const SORTS = { popular: 'Popular', name: 'Name', newest: 'Newest' } as const;
 const PAGE = 48;
-// A pangram (every letter) that's shorter and less worn than the quick brown fox.
-const DEFAULT_PREVIEW = 'Sphinx of black quartz, judge my vow';
-const DEFAULT_STYLE_PREVIEW = 'Sphinx of black quartz, judge my vow. 0123456789';
 const SELECTION_KEY = 'glyphyard:selection';
 
 type Props = {
@@ -50,11 +49,15 @@ export function Picker({ fonts, name, restricted, updated, embedOrigins, showBad
   const [embedOpen, setEmbedOpen] = useState(false);
   const [origin, setOrigin] = useState('');
   const [pair, setPair] = useState<[Font, Font] | null>(null);
+  // The server renders the first quote; a random one is picked after mount.
+  const [quote, setQuote] = useState<Quote>(QUOTES[0]);
+  const sample = previewText || quote.text;
 
   const byFamily = useMemo(() => new Map(fonts.map((f) => [f.family, f])), [fonts]);
 
   useEffect(() => {
     setOrigin(window.location.origin);
+    setQuote(randomQuote());
     // Shareable views: ?q=&category=&sort=&text=&size=
     const params = new URLSearchParams(window.location.search);
     const cat = CATEGORIES.find((c) => c.toLowerCase() === params.get('category')?.toLowerCase());
@@ -170,6 +173,16 @@ export function Picker({ fonts, name, restricted, updated, embedOrigins, showBad
             />
           </label>
           <ThemeToggle />
+          <a
+            className="github-link"
+            href="https://github.com/obrienafc/glyphyard"
+            target="_blank"
+            rel="noreferrer"
+            aria-label="Glyphyard on GitHub"
+            title="Glyphyard on GitHub"
+          >
+            <GitHubMark />
+          </a>
         </div>
       </nav>
 
@@ -251,15 +264,32 @@ export function Picker({ fonts, name, restricted, updated, embedOrigins, showBad
       </div>
 
       <main className="wrap">
-        <p className="count">
-          {results.length.toLocaleString()} {results.length === 1 ? 'family' : 'families'}
-        </p>
+        <div className="count-row">
+          <p className="count">
+            {results.length.toLocaleString()} {results.length === 1 ? 'family' : 'families'}
+          </p>
+          {!previewText && (
+            <p className="quote-credit">
+              <span>{quote.source}</span>
+              <button
+                type="button"
+                className="shuffle"
+                onClick={() => setQuote((q) => randomQuote(q))}
+                aria-label="Show a different quote"
+                title="Show a different quote"
+              >
+                <Shuffle size={14} strokeWidth={1.75} aria-hidden />
+                Shuffle
+              </button>
+            </p>
+          )}
+        </div>
         <div className="grid">
           {results.slice(0, limit).map((font) => (
             <FontCard
               key={font.family}
               font={font}
-              text={previewText}
+              text={sample}
               size={size}
               selected={selection[font.family]?.styles.length ?? 0}
               onOpen={() => setOpen(font)}
@@ -269,6 +299,12 @@ export function Picker({ fonts, name, restricted, updated, embedOrigins, showBad
         {results.length === 0 && <p className="empty">No fonts match those filters.</p>}
         <div ref={sentinel} aria-hidden />
         <footer className="footer">
+          <p className="credit">
+            Built by{' '}
+            <a href="https://patrickob.tech" target="_blank" rel="noreferrer">
+              Patrick O’Brien
+            </a>
+          </p>
           <p>
             Fonts are licensed by their authors.{' '}
             <a href="https://fonts.google.com/attribution" target="_blank" rel="noreferrer">
@@ -318,7 +354,7 @@ export function Picker({ fonts, name, restricted, updated, embedOrigins, showBad
       {open && (
         <StylesSheet
           font={open}
-          text={previewText}
+          text={sample}
           value={selection[open.family]}
           onChange={(v) => {
             const next = { ...selection };
@@ -444,7 +480,7 @@ function FontCard({
           fontStyle: isItalic(style) ? 'italic' : 'normal',
         }}
       >
-        {text || DEFAULT_PREVIEW}
+        {text}
       </span>
     </button>
   );
@@ -527,7 +563,7 @@ function StylesSheet({
                     fontStyle: isItalic(s) ? 'italic' : 'normal',
                   }}
                 >
-                  {text || DEFAULT_STYLE_PREVIEW}
+                  {text}
                 </span>
                 <span className="style-toggle" aria-hidden>
                   {on ? <CheckIcon /> : '+'}
@@ -698,6 +734,15 @@ function CheckIcon() {
   return (
     <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden>
       <path d="m3.5 8.5 3 3 6-7" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+/** GitHub's mark (Octicons, MIT). Brand logos are the one exception to the Lucide icon set. */
+function GitHubMark() {
+  return (
+    <svg viewBox="0 0 16 16" width="20" height="20" aria-hidden fill="currentColor">
+      <path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z" />
     </svg>
   );
 }
