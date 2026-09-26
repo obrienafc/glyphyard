@@ -20,6 +20,8 @@ import { QUOTE_GROUPS, QUOTES, type Quote, randomQuote } from '@/lib/quotes';
 import { decodeSelection, shareUrl } from '@/lib/share';
 import { Shuffle } from 'lucide-react';
 import { SpillcheckBadge } from './SpillcheckBadge';
+import { StaticDownload } from './StaticDownload';
+import { VariableWeight } from './VariableWeight';
 
 const CATEGORIES = ['All', 'Sans Serif', 'Serif', 'Display', 'Handwriting', 'Monospace'];
 const SORTS = { popular: 'Popular', name: 'Name', newest: 'Newest' } as const;
@@ -402,6 +404,7 @@ export function Picker({ fonts, name, restricted, updated, embedOrigins, showBad
         <EmbedSheet
           origin={origin}
           embedOrigins={embedOrigins}
+          sample={sample}
           fonts={selectedFamilies.map((f) => byFamily.get(f)!)}
           selection={selection}
           onEdit={(font) => {
@@ -569,6 +572,8 @@ function StylesSheet({
         )}
       </div>
 
+      {font.variable && <VariableWeight font={font} text={text} rangeEmbedded={variable} />}
+
       <ul className="styles" data-ready={ready}>
         {font.styles.map((s) => {
           const on = styles.includes(s);
@@ -601,6 +606,7 @@ function StylesSheet({
 function EmbedSheet({
   origin,
   embedOrigins,
+  sample,
   fonts,
   selection,
   onEdit,
@@ -609,6 +615,7 @@ function EmbedSheet({
 }: {
   origin: string;
   embedOrigins: string[] | null;
+  sample: string;
   fonts: Font[];
   selection: Selection;
   onEdit: (font: Font) => void;
@@ -616,10 +623,8 @@ function EmbedSheet({
   onClose: () => void;
 }) {
   const [mode, setMode] = useState<'link' | 'import'>('link');
-  const url = cssUrl(
-    origin,
-    fonts.map((f) => familySpec(f, selection[f.family].styles, selection[f.family].variable)),
-  );
+  const specs = fonts.map((f) => familySpec(f, selection[f.family].styles, selection[f.family].variable));
+  const url = cssUrl(origin, specs);
   const code =
     mode === 'link'
       ? `<link rel="preconnect" href="${origin}">\n<link href="${url}" rel="stylesheet">`
@@ -658,6 +663,13 @@ function EmbedSheet({
 
       <h3>CSS rules</h3>
       <Code value={fonts.map((f) => `font-family: ${cssFamily(f)};`).join('\n')} />
+
+      <h3>Static hosting</h3>
+      <p className="muted small-print static-intro">
+        Rather not run a server? Download the font files with a ready-made <code>fonts.css</code> and
+        host them anywhere.
+      </p>
+      <StaticDownload specs={specs} fonts={fonts} sample={sample} />
 
       <h3>Selected</h3>
       <ul className="selected-list">

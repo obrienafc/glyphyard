@@ -32,6 +32,12 @@ Google Fonts, but your visitors only ever talk to your domain.
 - **Shareable links.** Selections (`?f=Inter:400,700&f=Lora:400:v`), pairings
   (`?pair=Playfair Display|Inter`) and views
   (`?category=serif&text=Hello&sort=newest&size=48`).
+- **Variable weights.** Drag a slider to preview any weight in a variable
+  font's range, with italics where available.
+- **Download for static hosting.** Get a zip with the woff2 files, a ready-made
+  `fonts.css`, an example page and a README, and host the fonts anywhere, no
+  server needed. The zip is built in your browser from this instance's cached
+  files.
 - **Light, dark or system appearance**, remembered per browser.
 
 ## Deploy

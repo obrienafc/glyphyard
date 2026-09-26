@@ -1248,3 +1248,92 @@ select.field {
 .demo-note {
   margin: 0 0 var(--space-md);
 }
+
+/* Variable weight -------------------------------------------------------- */
+
+.variable {
+  margin: 0 0 var(--space-md);
+  padding: var(--space-md);
+  border-radius: 14px;
+  background: var(--bg);
+}
+
+.variable-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: 14px;
+}
+
+.variable-head > label:first-child {
+  font-weight: 600;
+}
+
+.variable-head output {
+  font-variant-numeric: tabular-nums;
+}
+
+.small-check {
+  min-height: 32px;
+  margin-left: auto;
+  font-size: 14px;
+}
+
+.variable-sample {
+  margin: var(--space-sm) 0;
+  font-size: 34px;
+  line-height: 1.2;
+  letter-spacing: normal;
+  overflow-wrap: anywhere;
+  opacity: 0;
+  transition: opacity 0.2s var(--ease);
+}
+
+.variable-sample[data-ready='true'] {
+  opacity: 1;
+}
+
+.variable-range {
+  width: 100%;
+  accent-color: var(--accent);
+}
+
+.variable-scale {
+  display: flex;
+  justify-content: space-between;
+  color: var(--text-3);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.variable-hint {
+  margin: var(--space-sm) 0 0;
+  font-size: 13px;
+}
+
+/* Static download -------------------------------------------------------- */
+
+.static-intro {
+  margin: 0 0 var(--space-sm);
+}
+
+.static-download {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-sm) var(--space-md);
+}
+
+.static-download .button {
+  gap: 6px;
+}
+
+.static-download .button:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.static-download p {
+  margin: 0;
+  font-size: 13px;
+}
