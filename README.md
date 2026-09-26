@@ -100,7 +100,9 @@ fonts doesn't depend on it.
 
 ## License
 
-MIT. Fonts are licensed by their respective authors; see
+[AGPL-3.0](LICENSE). You can use, modify and self-host Glyphyard freely. If you
+run a modified version as a public service, you must share its source code under
+the same licence. Fonts are licensed by their respective authors; see
 [Google Fonts attribution](https://fonts.google.com/attribution).
 
 <sub>Inspired by [fontless](https://github.com/herber/fontless).</sub>
