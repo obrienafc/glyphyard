@@ -16,7 +16,7 @@ import {
   styleLabel,
   weightOf,
 } from '@/lib/fonts';
-import { QUOTES, type Quote, randomQuote } from '@/lib/quotes';
+import { QUOTE_GROUPS, QUOTES, type Quote, randomQuote } from '@/lib/quotes';
 import { decodeSelection, shareUrl } from '@/lib/share';
 import { Shuffle } from 'lucide-react';
 import { SpillcheckBadge } from './SpillcheckBadge';
@@ -269,8 +269,28 @@ export function Picker({ fonts, name, restricted, updated, embedOrigins, showBad
             {results.length.toLocaleString()} {results.length === 1 ? 'family' : 'families'}
           </p>
           {!previewText && (
-            <p className="quote-credit">
-              <span>{quote.source}</span>
+            <div className="quote-picker">
+              <label className="visually-hidden" htmlFor="quote">
+                Preview quote
+              </label>
+              <select
+                id="quote"
+                className="quote-select"
+                value={QUOTES.indexOf(quote)}
+                onChange={(e) => setQuote(QUOTES[Number(e.target.value)])}
+              >
+                {QUOTE_GROUPS.map((group) => (
+                  <optgroup key={group} label={group}>
+                    {QUOTES.map((q, i) =>
+                      q.group === group ? (
+                        <option key={i} value={i}>
+                          {q.text}
+                        </option>
+                      ) : null,
+                    )}
+                  </optgroup>
+                ))}
+              </select>
               <button
                 type="button"
                 className="shuffle"
@@ -281,7 +301,8 @@ export function Picker({ fonts, name, restricted, updated, embedOrigins, showBad
                 <Shuffle size={14} strokeWidth={1.75} aria-hidden />
                 Shuffle
               </button>
-            </p>
+              <p className="quote-source">{quote.source}</p>
+            </div>
           )}
         </div>
         <div className="grid">
