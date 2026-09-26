@@ -2,6 +2,7 @@
 
 import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 import type { Font } from '@/lib/catalog';
+import { ThemeToggle } from './ThemeToggle';
 import {
   type Selection,
   cssFamily,
@@ -17,6 +18,9 @@ import {
 const CATEGORIES = ['All', 'Sans Serif', 'Serif', 'Display', 'Handwriting', 'Monospace'];
 const SORTS = { popular: 'Popular', name: 'Name', newest: 'Newest' } as const;
 const PAGE = 48;
+// A pangram (every letter) that's shorter and less worn than the quick brown fox.
+const DEFAULT_PREVIEW = 'Sphinx of black quartz, judge my vow';
+const DEFAULT_STYLE_PREVIEW = 'Sphinx of black quartz, judge my vow. 0123456789';
 const SELECTION_KEY = 'glyphyard:selection';
 
 type Props = { fonts: Font[]; name: string; restricted: boolean; updated: string };
@@ -105,7 +109,7 @@ export function Picker({ fonts, name, restricted, updated }: Props) {
         <div className="wrap navbar-inner">
           <a className="brand" href="/">
             <Logo />
-            {name}
+            <span className="brand-name">{name}</span>
           </a>
           <label className="search">
             <SearchIcon />
@@ -117,6 +121,7 @@ export function Picker({ fonts, name, restricted, updated }: Props) {
               onChange={(e) => setQuery(e.target.value)}
             />
           </label>
+          <ThemeToggle />
         </div>
       </nav>
 
@@ -363,7 +368,7 @@ function FontCard({
           fontStyle: isItalic(style) ? 'italic' : 'normal',
         }}
       >
-        {text || 'The quick brown fox jumps over the lazy dog'}
+        {text || DEFAULT_PREVIEW}
       </span>
     </button>
   );
@@ -474,7 +479,7 @@ function StylesSheet({
                     fontStyle: isItalic(s) ? 'italic' : 'normal',
                   }}
                 >
-                  {text || 'Whereas recognition of the inherent dignity'}
+                  {text || DEFAULT_STYLE_PREVIEW}
                 </span>
                 <span className="style-toggle" aria-hidden>
                   {on ? <CheckIcon /> : '+'}
