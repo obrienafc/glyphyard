@@ -13,8 +13,11 @@ const USER_AGENT =
 const CORS = { 'Access-Control-Allow-Origin': '*' };
 
 // With an embed allowlist, the CDN must cache per requesting site, not share
-// one response between an allowed site and a disallowed one.
-const VARY: Record<string, string> = embedOrigins ? { Vary: 'Origin, Referer' } : {};
+// one response between an allowed site and a disallowed one. Netlify's CDN
+// reads its own Netlify-Vary header for request headers.
+const VARY: Record<string, string> = embedOrigins
+  ? { Vary: 'Origin, Referer', 'Netlify-Vary': 'header=Origin|Referer' }
+  : {};
 
 const DEMO_MESSAGE =
   'this instance only serves fonts to its own sites. Deploy your own Glyphyard for free: https://github.com/obrienafc/glyphyard';

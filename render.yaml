@@ -1,0 +1,11 @@
+# Render Blueprint: https://render.com/docs/blueprint-spec
+# Starter, not Free: free services sleep when idle, and a sleeping font server
+# delays every page that uses it by up to a minute on the next visit.
+services:
+  - type: web
+    name: glyphyard
+    runtime: node
+    plan: starter
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /

@@ -14,6 +14,8 @@ Google Fonts, but your visitors only ever talk to your domain.
 > instance. That's the whole point.
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fobrienafc%2Fglyphyard&project-name=glyphyard&env=GLYPHYARD_NAME&envDescription=Name%20shown%20in%20the%20header%20(optional))
+[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/obrienafc/glyphyard)
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/obrienafc/glyphyard)
 
 ## Features
 
@@ -42,11 +44,19 @@ Google Fonts, but your visitors only ever talk to your domain.
 
 ## Deploy
 
-1. Click **Deploy with Vercel** above, or import this repo at vercel.com/new.
-2. In the Vercel project, open **Settings → Domains** and add your domain, then
-   create the DNS record Vercel shows you (usually a `CNAME` to
-   `cname.vercel-dns.com`).
+1. Click a deploy button above.
+2. Add your domain in the host's domain settings and create the DNS record it
+   shows you (usually a `CNAME`).
 3. Visit your domain, pick fonts, and copy the `<link>` tag.
+
+| Host | Notes |
+| ---- | ----- |
+| **Vercel** | The reference setup; the public demo runs here. Fonts are cached on Vercel's CDN. |
+| **Netlify** | Works as-is; fonts are cached on Netlify's CDN. |
+| **Render** | Uses `render.yaml` (Starter plan; Free sleeps when idle, which stalls font loading). Render has no CDN cache in front by default, so each font request goes to Google; put Cloudflare in front for busy sites. |
+
+Set environment variables (see [Configuration](#configuration)) in the host's
+dashboard.
 
 Or run it on any host with Node 20+:
 
